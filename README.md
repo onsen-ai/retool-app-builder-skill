@@ -130,6 +130,10 @@ Issues and PRs welcome. The most impactful contributions:
 - New assertions in `evals/evals.json`
 - Script improvements (especially `validate_app.py` — more checks = fewer import failures)
 
+## Built by
+
+[Onsen](https://www.onsenapp.com) — built with AI agents, for AI agents.
+
 ## License
 
 MIT
