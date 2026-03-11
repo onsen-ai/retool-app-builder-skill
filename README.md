@@ -1,10 +1,10 @@
 # retool-app-builder-skill
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill for building, editing, and improving importable [Retool](https://retool.com) apps using ToolScript (RSX format).
+An agent skill for building, editing, and improving importable [Retool](https://retool.com) apps using ToolScript (RSX format). Compatible with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Cursor](https://cursor.com), [Cline](https://cline.bot), [OpenCode](https://github.com/opencode-ai/opencode), and any coding agent that supports the [skills standard](https://github.com/vercel-labs/skills).
 
 ## What it does
 
-This skill enables Claude to generate complete, importable Retool applications from natural language descriptions. It handles the mechanical and error-prone parts of ToolScript — validation, scaffolding, position math, query wiring — so the LLM focuses on creative and structural decisions.
+This skill enables your coding agent to generate complete, importable Retool applications from natural language descriptions. It handles the mechanical and error-prone parts of ToolScript — validation, scaffolding, position math, query wiring — so the LLM focuses on creative and structural decisions.
 
 ### Three modes
 
@@ -17,29 +17,32 @@ This skill enables Claude to generate complete, importable Retool applications f
 ### Via skills CLI ([vercel-labs/skills](https://github.com/vercel-labs/skills))
 
 ```bash
+# Install for your preferred agent
 npx skills add onsen-ai/retool-app-builder-skill -a claude-code
+npx skills add onsen-ai/retool-app-builder-skill -a cursor
+npx skills add onsen-ai/retool-app-builder-skill -a cline
 ```
 
 ### Manual install
 
-Clone into your personal or project skills directory:
+Clone into your agent's skills directory:
 
 ```bash
-# Personal (available in all projects)
+# Example for Claude Code
 git clone https://github.com/onsen-ai/retool-app-builder-skill.git \
   ~/.claude/skills/retool-app-builder
 
-# Or project-specific (checked into your repo)
+# Example for Cursor
 git clone https://github.com/onsen-ai/retool-app-builder-skill.git \
-  .claude/skills/retool-app-builder
+  .cursor/skills/retool-app-builder
 ```
 
-Claude Code discovers skills automatically from these locations — no configuration needed.
+Most agents discover skills automatically from their skills directory — no extra configuration needed.
 
 ### Requirements
 
 - Python 3.8+ (stdlib only, no pip installs)
-- Claude Code CLI
+- A coding agent with skill support
 
 ## What's included
 
@@ -114,9 +117,9 @@ create modal, edit side panel, and approve/reject workflow"
 
 Retool's ToolScript format (RSX) has strict rules for nesting, positioning, ID formats, and query wiring that cause silent import failures when violated. This skill:
 
-1. Bundles a condensed cheatsheet of all rules so Claude doesn't need to memorize the 2541-line spec
+1. Bundles a condensed cheatsheet of all rules so the agent doesn't need to memorize the 2541-line spec
 2. Provides automation scripts for the most error-prone operations (position math, ID generation, validation)
-3. Guides Claude through structured workflows (NEW/EDIT/IMPROVE) with explicit steps
+3. Guides the agent through structured workflows (NEW/EDIT/IMPROVE) with explicit steps
 4. Always validates before zipping — catching errors before they reach Retool's importer
 
 ## Contributing
