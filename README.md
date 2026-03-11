@@ -14,7 +14,13 @@ This skill enables Claude to generate complete, importable Retool applications f
 
 ## Installation
 
-### As a Claude Code skill
+### Via skills CLI ([vercel-labs/skills](https://github.com/vercel-labs/skills))
+
+```bash
+npx skills add onsen-ai/retool-app-builder-skill -a claude-code
+```
+
+### Manual install
 
 Clone into your personal or project skills directory:
 
