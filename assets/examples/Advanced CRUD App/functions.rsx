@@ -1,5 +1,5 @@
 <GlobalFunctions>
-  <State id="isBulkUpdate" value="{{ false }}" />
+<State id="isBulkUpdate" value="{{ false }}" />
   <State id="bulkUpdateData" value="{{ [] }}" />
 
   <SqlQueryUnified

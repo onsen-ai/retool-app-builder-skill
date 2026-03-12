@@ -1,5 +1,5 @@
 <GlobalFunctions>
-  <State id="detailTab" value="{{ 'details' }}" />
+<State id="detailTab" value="{{ 'details' }}" />
   <SqlQueryUnified
     id="selectCustomers"
     query={include("./lib/selectCustomers.sql", "string")}

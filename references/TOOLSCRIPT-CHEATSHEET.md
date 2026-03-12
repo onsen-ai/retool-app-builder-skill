@@ -392,6 +392,20 @@ resultsTable.setFilterStack(stack);
 
 **Filter operators:** `=`, `!=`, `>=`, `<=`, `>`, `<`, `isOneOf`, `includes`, `doesNotInclude`, `isEmpty`, `isNotEmpty`, `isTrue`, `isFalse`
 
+### Mock Data Fallbacks
+
+Use `Array.isArray()` in `data` attributes to provide inline sample data when no database is connected:
+
+```jsx
+<!-- Table with mock data fallback -->
+<Table id="tbl" data="{{ Array.isArray(selectItems.data) ? selectItems.data : [{ id: 1, name: 'Sample Item', status: 'active' }, { id: 2, name: 'Another Item', status: 'draft' }] }}" ...>
+
+<!-- Select with mock data fallback -->
+<Select id="sel" data="{{ Array.isArray(selectCategories.data) ? selectCategories.data : [{ id: 1, name: 'Category A' }, { id: 2, name: 'Category B' }] }}" itemMode="mapped" labels="{{ item.name }}" values="{{ item.id }}" ...>
+```
+
+When a query has no DB connected, `query.data` returns an error object (not an array), so the fallback activates. When real data flows (always an array), it's used directly. **Don't use `||`** — the error object is truthy so `||` won't trigger the fallback. To remove: change `{{ Array.isArray(q.data) ? q.data : [...] }}` to `{{ q.data }}`.
+
 ### SqlTransformQuery (Derived Lookups)
 ```jsx
 <SqlTransformQuery id="selectDepartments"

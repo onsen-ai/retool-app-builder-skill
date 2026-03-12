@@ -2,6 +2,28 @@
   "pageTitle": {
     "row": 0,
     "height": 0.6,
+    "width": 10
+  },
+  "setupGuideBtn": {
+    "row": 0,
+    "col": 10,
+    "height": 1,
+    "width": 2
+  },
+  "setupGuideModal": {
+    "row": 0,
+    "height": 1,
+    "width": 12
+  },
+  "setupGuideTitle": {
+    "subcontainer": "setupGuideModal",
+    "rowGroup": "header",
+    "height": 0.6,
+    "width": 12
+  },
+  "setupGuideText": {
+    "subcontainer": "setupGuideModal",
+    "height": 4,
     "width": 12
   },
   "searchInput": {

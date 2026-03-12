@@ -1,5 +1,5 @@
 <GlobalFunctions>
-  <State id="editingRowId" value="{{ null }}" />
+<State id="editingRowId" value="{{ null }}" />
   <SqlQueryUnified
     id="selectProducts"
     query={include("./lib/selectProducts.sql", "string")}

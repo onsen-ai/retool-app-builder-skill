@@ -15,6 +15,22 @@
       value="### Products"
       verticalAlign="center"
     />
+    <Button
+      id="setupGuideBtn"
+      marginType="normal"
+      text="Setup Guide"
+    >
+      <Event
+        id="fa1b2c3d"
+        event="click"
+        method="show"
+        params={{}}
+        pluginId="setupGuideModal"
+        type="widget"
+        waitMs="0"
+        waitType="debounce"
+      />
+    </Button>
     <Modal
       id="createModal"
       buttonText="Add product"
@@ -127,7 +143,7 @@
       cellSelection="none"
       changesetArray={[]}
       clearChangesetOnSave={true}
-      data="{{ selectProducts.data }}"
+      data="{{ Array.isArray(selectProducts.data) ? selectProducts.data : [{ id: 1, name: 'Organic Green Tea', description: 'Premium loose leaf', category: 'Beverages', price: 12.99, created_at: '2024-01-15' }, { id: 2, name: 'Vitamin D3 1000IU', description: 'Daily supplement', category: 'Supplements', price: 8.49, created_at: '2024-02-20' }, { id: 3, name: 'Almond Butter', description: 'Smooth, no added sugar', category: 'Food', price: 6.99, created_at: '2024-03-10' }] }}"
       defaultSelectedRow={{ mode: "index", indexType: "display", index: 0 }}
       enableSaveActions={true}
       heightType="auto"
@@ -228,4 +244,29 @@
     </Table>
   </Frame>
   <Include src="./src/editModal.rsx" />
+  <ModalFrame
+    id="setupGuideModal"
+    hidden={false}
+    hideOnEscape={true}
+    overlayInteraction="close"
+    showOverlay={true}
+    size="medium"
+  >
+    <Header>
+      <Text
+        id="setupGuideTitle"
+        marginType="normal"
+        value="## 🚀 Setup Guide"
+        verticalAlign="center"
+      />
+    </Header>
+    <Body>
+      <Text
+        id="setupGuideText"
+        marginType="normal"
+        value="{{ 'Welcome! This app is loaded with **sample data** so you can click around and explore right away.\n\nWhen you are ready to wire up your real database, follow these steps:\n\n1. 🔌 **Connect your database** — Go to *Resources* in Retool and add your DB\n2. 🔄 **Update queries** — Open each query in the bottom panel and switch the Resource\n3. 📝 **Update table/column names** — Edit the SQL in lib/ files to match your schema\n4. 🧹 **Remove mock data** — In each Table/Select, remove the mock array fallback from the data attribute\n5. 🗑️ **Delete this modal** — Remove this Setup Guide and the setupGuideBtn button\n\n✅ You are all set — happy building!' }}"
+        verticalAlign="top"
+      />
+    </Body>
+  </ModalFrame>
 </App>

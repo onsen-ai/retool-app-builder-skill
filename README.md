@@ -12,6 +12,10 @@ This skill enables your coding agent to generate complete, importable Retool app
 - **EDIT** — "Add a search bar and status filter to my app" → understands existing structure, adds components, fixes positions
 - **IMPROVE** — "Make this app production-ready" → audits against best practices, adds loading states, confirmation dialogs, event chains
 
+### Works without a database
+
+Scaffolded apps (crud, master-detail, search-filter, advanced-crud) include **inline mock data** and a **Setup Guide modal**. Tables and forms are fully populated with sample data on import — no database connection required to explore the app. When you're ready to connect your real database, the Setup Guide walks you through the steps, and removing the mock data is a one-line edit per component (`{{ Array.isArray(q.data) ? q.data : [...] }}` → `{{ q.data }}`).
+
 ## Installation
 
 ### Via skills CLI ([vercel-labs/skills](https://github.com/vercel-labs/skills))

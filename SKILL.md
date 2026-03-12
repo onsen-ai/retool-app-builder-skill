@@ -74,10 +74,11 @@ Read the template example files from `assets/examples/<name>/` before customizin
    ```bash
    python scripts/scaffold_app.py "App Name" --template <type> --output-dir <path>
    ```
-3. **Read ALL generated files** to understand the starting point
-4. **Read the closest example** from `assets/examples/` for pattern reference
-5. **Customize:** modify query SQL, component labels/attributes, column definitions, form fields
-6. **Add new components:**
+3. **Note:** Scaffolded apps include mock data fallbacks and a Setup Guide modal so the app is functional on import without a database. See "Mock Data" below.
+4. **Read ALL generated files** to understand the starting point
+5. **Read the closest example** from `assets/examples/` for pattern reference
+6. **Customize:** modify query SQL, component labels/attributes, column definitions, form fields
+7. **Add new components:**
    ```bash
    python scripts/add_component.py <dir> --type TextInput --id searchInput --parent-frame '$main' --after pageTitle --attrs 'label="" placeholder="Search..."' --width 6
    ```
@@ -146,6 +147,8 @@ Read the template example files from `assets/examples/<name>/` before customizin
    - [ ] Are State variables used for UI mode flags (bulk update, editing state)?
    - [ ] Does the app have proper event chains (mutate → refresh → UI update)?
    - [ ] Are ModalFrame/SplitPaneFrame/DrawerFrame children of App (not Frame)?
+   - [ ] Remove mock data fallbacks if real DB is connected (`Array.isArray(q.data) ? q.data : [...]` in Table/Select data attributes)?
+   - [ ] Remove Setup Guide modal if no longer needed?
 4. **Present findings** and proposed changes to user
 5. **Apply approved improvements**
 6. **Validate + zip**
@@ -178,6 +181,17 @@ For when scripts aren't sufficient — the critical rules to follow:
 - Boolean: `{true}` not `"true"`
 - Expressions: `{{ widget.value }}`
 - Include: `{include("./lib/file.sql", "string")}`
+
+### Mock Data
+
+Scaffolded apps (crud, master-detail, search-filter, advanced-crud) include inline mock data fallbacks on Table and Select `data` attributes. This makes the app fully functional with sample data before a real database is connected.
+
+**How it works:** `data="{{ Array.isArray(query.data) ? query.data : [{ id: 1, name: 'Example' }] }}"` — when the query has no resource, `query.data` returns an error object (not an array), so the fallback is used. When a real DB returns data (an array), the ternary uses it directly.
+
+**To connect your real database:**
+1. Update `resourceName` in each query in `functions.rsx` to your database resource UUID
+2. Remove the mock data fallbacks from Table/Select `data` attributes (change `{{ Array.isArray(query.data) ? query.data : [...] }}` to `{{ query.data }}`)
+3. Delete the Setup Guide modal (`setupGuideModal` ModalFrame) and the `setupGuideBtn` button
 
 For deeper reference: read `references/TOOLSCRIPT-CHEATSHEET.md` or the full spec.
 

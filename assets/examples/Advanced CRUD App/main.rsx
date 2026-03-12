@@ -17,6 +17,22 @@
       value="### Team Members"
       verticalAlign="center"
     />
+    <Button
+      id="setupGuideBtn"
+      marginType="normal"
+      text="Setup Guide"
+    >
+      <Event
+        id="fd4e5f6a"
+        event="click"
+        method="show"
+        params={{}}
+        pluginId="setupGuideModal"
+        type="widget"
+        waitMs="0"
+        waitType="debounce"
+      />
+    </Button>
     <TextInput
       id="searchInput"
       iconBefore="bold/interface-search"
@@ -38,7 +54,7 @@
     </TextInput>
     <Select
       id="departmentFilter"
-      data="{{ selectDepartments.data }}"
+      data="{{ Array.isArray(selectDepartments.data) ? selectDepartments.data : [{ label: 'Engineering', value: 'Engineering' }, { label: 'Marketing', value: 'Marketing' }, { label: 'Sales', value: 'Sales' }] }}"
       emptyMessage="All departments"
       itemMode="mapped"
       label="Department"
@@ -166,7 +182,7 @@
       cellSelection="none"
       changesetArray={[]}
       clearChangesetOnSave={true}
-      data="{{ selectMembers.data }}"
+      data="{{ Array.isArray(selectMembers.data) ? selectMembers.data : [{ id: 1, name: 'Alice Johnson', email: 'alice@example.com', department: 'Engineering', status: 'active', joined_date: '2023-06-15', role: 'Senior Engineer' }, { id: 2, name: 'Bob Smith', email: 'bob@example.com', department: 'Marketing', status: 'active', joined_date: '2023-09-01', role: 'Marketing Lead' }, { id: 3, name: 'Carol Davis', email: 'carol@example.com', department: 'Engineering', status: 'on_leave', joined_date: '2024-01-10', role: 'Junior Engineer' }] }}"
       defaultSelectedRow={{ mode: "index", indexType: "display", index: 0 }}
       enableSaveActions={true}
       groupByColumnId="c04d4"
@@ -298,4 +314,29 @@
       />
     </Table>
   </Frame>
+  <ModalFrame
+    id="setupGuideModal"
+    hidden={false}
+    hideOnEscape={true}
+    overlayInteraction="close"
+    showOverlay={true}
+    size="medium"
+  >
+    <Header>
+      <Text
+        id="setupGuideTitle"
+        marginType="normal"
+        value="## 🚀 Setup Guide"
+        verticalAlign="center"
+      />
+    </Header>
+    <Body>
+      <Text
+        id="setupGuideText"
+        marginType="normal"
+        value="{{ 'Welcome! This app is loaded with **sample data** so you can click around and explore right away.\n\nWhen you are ready to wire up your real database, follow these steps:\n\n1. 🔌 **Connect your database** — Go to *Resources* in Retool and add your DB\n2. 🔄 **Update queries** — Open each query in the bottom panel and switch the Resource\n3. 📝 **Update table/column names** — Edit the SQL in lib/ files to match your schema\n4. 🧹 **Remove mock data** — In each Table/Select, remove the mock array fallback from the data attribute\n5. 🗑️ **Delete this modal** — Remove this Setup Guide and the setupGuideBtn button\n\n✅ You are all set — happy building!' }}"
+        verticalAlign="top"
+      />
+    </Body>
+  </ModalFrame>
 </App>

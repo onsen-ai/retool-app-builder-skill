@@ -1,5 +1,5 @@
 <GlobalFunctions>
-  <SqlQueryUnified
+<SqlQueryUnified
     id="selectProducts"
     query={include("./lib/selectProducts.sql", "string")}
     resourceDisplayName="your-database"

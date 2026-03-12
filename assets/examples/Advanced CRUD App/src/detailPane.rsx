@@ -78,7 +78,7 @@
           />
           <Select
             id="detailDepartment"
-            data="{{ selectDepartments.data }}"
+            data="{{ Array.isArray(selectDepartments.data) ? selectDepartments.data : [{ label: 'Engineering', value: 'Engineering' }, { label: 'Marketing', value: 'Marketing' }, { label: 'Sales', value: 'Sales' }] }}"
             formDataKey="department"
             itemMode="mapped"
             label="Department"

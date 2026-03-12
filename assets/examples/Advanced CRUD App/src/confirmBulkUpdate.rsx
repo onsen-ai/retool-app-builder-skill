@@ -1,5 +1,6 @@
 <ModalFrame
   id="confirmBulkUpdate"
+  hidden={true}
   hideOnEscape={true}
   overlayInteraction="close"
   size="medium"
@@ -55,7 +56,7 @@
     <Text
       id="bulkFieldSummary"
       marginType="normal"
-      value="**Fields that will be updated:** status, role\n\n_Only editable columns from the table will be included in the update._"
+      value="{{ '**Fields that will be updated:** status, role\n\n_Only editable columns from the table will be included in the update._' }}"
       verticalAlign="top"
     />
   </Body>

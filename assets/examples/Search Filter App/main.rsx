@@ -15,6 +15,22 @@
       value="### Product Catalog"
       verticalAlign="center"
     />
+    <Button
+      id="setupGuideBtn"
+      marginType="normal"
+      text="Setup Guide"
+    >
+      <Event
+        id="fc3d4e5f"
+        event="click"
+        method="show"
+        params={{}}
+        pluginId="setupGuideModal"
+        type="widget"
+        waitMs="0"
+        waitType="debounce"
+      />
+    </Button>
     <TextInput
       id="searchInput"
       iconBefore="bold/interface-search"
@@ -36,7 +52,7 @@
     </TextInput>
     <Select
       id="categoryFilter"
-      data="{{ selectCategories.data }}"
+      data="{{ Array.isArray(selectCategories.data) ? selectCategories.data : [{ id: 1, name: 'Beverages' }, { id: 2, name: 'Supplements' }, { id: 3, name: 'Food' }] }}"
       emptyMessage="All categories"
       itemMode="mapped"
       label="Category"
@@ -162,7 +178,7 @@
     <Table
       id="resultsTable"
       cellSelection="none"
-      data="{{ selectProducts.data }}"
+      data="{{ Array.isArray(selectProducts.data) ? selectProducts.data : [{ id: 1, name: 'Organic Green Tea', description: 'Premium loose leaf', category: 'Beverages', category_name: 'Beverages', price: 12.99, status: 'active', created_at: '2024-01-15', updated_at: '2024-01-15' }, { id: 2, name: 'Vitamin D3 1000IU', description: 'Daily supplement', category: 'Supplements', category_name: 'Supplements', price: 8.49, status: 'active', created_at: '2024-02-20', updated_at: '2024-03-01' }, { id: 3, name: 'Almond Butter', description: 'Smooth, no added sugar', category: 'Food', category_name: 'Food', price: 6.99, status: 'draft', created_at: '2024-03-10', updated_at: '2024-03-10' }] }}"
       defaultSelectedRow={{ mode: "none", indexType: "display", index: 0 }}
       heightType="auto"
       primaryKeyColumnId="c01a1"
@@ -234,4 +250,29 @@
       <ToolbarButton id="tb01" icon="bold/interface-text-formatting-filter-2" label="Filter" type="filter" />
     </Table>
   </Frame>
+  <ModalFrame
+    id="setupGuideModal"
+    hidden={false}
+    hideOnEscape={true}
+    overlayInteraction="close"
+    showOverlay={true}
+    size="medium"
+  >
+    <Header>
+      <Text
+        id="setupGuideTitle"
+        marginType="normal"
+        value="## 🚀 Setup Guide"
+        verticalAlign="center"
+      />
+    </Header>
+    <Body>
+      <Text
+        id="setupGuideText"
+        marginType="normal"
+        value="{{ 'Welcome! This app is loaded with **sample data** so you can click around and explore right away.\n\nWhen you are ready to wire up your real database, follow these steps:\n\n1. 🔌 **Connect your database** — Go to *Resources* in Retool and add your DB\n2. 🔄 **Update queries** — Open each query in the bottom panel and switch the Resource\n3. 📝 **Update table/column names** — Edit the SQL in lib/ files to match your schema\n4. 🧹 **Remove mock data** — In each Table/Select, remove the mock array fallback from the data attribute\n5. 🗑️ **Delete this modal** — Remove this Setup Guide and the setupGuideBtn button\n\n✅ You are all set — happy building!' }}"
+        verticalAlign="top"
+      />
+    </Body>
+  </ModalFrame>
 </App>
