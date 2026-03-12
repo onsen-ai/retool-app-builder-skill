@@ -449,6 +449,39 @@ Older list view (non-Beta).
 ### `<TabbedContainer>` → see `<Container>` with `<Tabs>`
 Tabbed layout is achieved via `<Container>` + `<Tabs navigateContainer={true} targetContainerId="...">`.
 
+### `<SidebarFrame>`
+App-level sidebar navigation panel (child of `<App>`, via `<Include>`).
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | `"sidebarFrame1"` |
+| `width` | string | `"240px"` |
+| `padding` | string | `"8px 12px"` |
+| `headerPadding` | string | `"8px 12px"` |
+| `footerPadding` | string | `"8px 12px"` |
+| `showHeader` | bool | |
+| `showFooter` | bool | |
+| `isHiddenOnMobile` | bool | `true` |
+
+**Children:** `<Header>`, `<Body>`, `<Footer>` — typically contains `<Navigation>` for menu items and `<Avatar>` in footer.
+
+**Usage pattern:**
+```jsx
+<!-- sidebar.rsx -->
+<SidebarFrame id="sidebarFrame1" width="240px" padding="8px 12px" isHiddenOnMobile={true} showFooter={true}>
+  <Body>
+    <Navigation id="sideNav" itemMode="static" orientation="vertical">
+      <Option id="hex5" highlight="true" itemType="custom" label="Users" />
+    </Navigation>
+  </Body>
+  <Footer>
+    <Avatar id="avatar1" fallback="{{ current_user.fullName }}" label="{{ current_user.fullName }}" />
+  </Footer>
+</SidebarFrame>
+```
+
+**Apps (templates):** Basic Layout, Customer Support Tool
+
 ---
 
 ## 6. Data Display Components
@@ -538,7 +571,13 @@ Table column definition.
 | `optionList` | object | For tag/select columns |
 | `statusIndicatorOptions` | object | |
 
-**Column `format` values:** `string`, `multilineString`, `decimal`, `percent`, `boolean`, `datetime`, `date`, `tag`, `tags`, `json`, `html`, `markdown`, `progress`
+**Column `format` values:** `string`, `multilineString`, `decimal`, `percent`, `currency`, `boolean`, `datetime`, `date`, `tag`, `tags`, `json`, `html`, `markdown`, `progress`, `image`, `avatar`, `link`
+
+**Format-specific `formatOptions`:**
+- `currency`: `{ currency: "USD", currencySign: "standard", currencyDisplay: "symbol", notation: "standard", showSeparators: true }`
+- `image`: `{ widthType: "fit" }`
+- `link`: `{ showUnderline: "hover" }`
+- `avatar`: (uses `referenceId` + `valueOverride` + `caption` for composite display)
 
 ### `<Action>`
 Table row action button.
@@ -729,9 +768,12 @@ Alternative tag display widget.
 | `readOnly` | string | `"true"` |
 | `showClear` | bool | |
 | `value` | expr | |
-| `iconBefore` | string | |
+| `iconBefore` | string | `"bold/interface-search"`, `"search"`, `"github"` |
 | `disabled` | expr | |
 | `hidden` | expr | |
+| `validationType` | string | `"regexp"` — enable regex validation |
+| `type` | string | `"text"`, `"password"` |
+| `maintainSpaceWhenHidden` | bool | |
 
 ### `<TextArea>`
 | Attribute | Type | Example |
@@ -1063,7 +1105,18 @@ Markdown-enabled text display.
   verticalAlign="center" horizontalAlign="center" disableMarkdown={false}
   heightType="fixed"/"fill" style={{ ordered: [{ color: "rgb(23,61,36)" }] }} />
 ```
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `renderAsHtml` | bool | `true` — render value as raw HTML instead of markdown |
+| `renderAsMarkdown` | bool | `false` — explicitly disable markdown rendering |
+| `marginType` | string | `"normal"` |
+| `maintainSpaceWhenHidden` | bool | Preserve layout space when hidden |
+| `showInEditor` | bool | |
+
 Supports markdown (`#`, `##`, `**bold**`, etc.) and inline HTML (`<pre>`, `<div>`, `<span>`).
+
+**Note:** Legacy templates use `<TextWidget>` — this is the older name for `<Text>` with `renderAsHtml` and `renderAsMarkdown` attributes.
 
 ### `<Image>`
 ```jsx
@@ -1134,6 +1187,175 @@ AI chat interface widget.
 | `_defaultUsername` | expr | |
 
 **Apps:** Iris Atlas v2
+
+### `<PlotlyChart>`
+Plotly.js chart wrapper. Supports all Plotly chart types via JSON data/layout configuration.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | `"indicatorChart"` |
+| `chartType` | string | `"line"`, `"bar"`, `"pie"`, `"scatter"` |
+| `data` | include/string | `{include("./lib/chart.data.json", "string")}` — Plotly data array |
+| `layout` | include/string | `{include("./lib/chart.layout.json", "string")}` — Plotly layout object |
+| `dataseries` | object | Ordered array of series definitions (see below) |
+| `datasourceDataType` | string | `"array"`, `"object"` |
+| `datasourceInputMode` | string | `"javascript"` (use datasourceJS), omitted (use datasourcePluginId) |
+| `datasourceJS` | expr | `"{{getData.data}}"` — JS expression for data source |
+| `datasourcePluginId` | string | Query id for data binding |
+| `datasourcePluginType` | string | `"plugin"` |
+| `groupByDropdown` | string | Field name for grouping (e.g., `"countryiso3code"`) |
+| `groupByJS` | expr | JS expression for group values |
+| `isDataTemplateDirty` | bool | |
+| `isJsonTemplateDirty` | bool | |
+| `isLayoutJsonDirty` | bool | |
+| `legendAlignment` | string | `"right"`, `"bottom"` |
+| `skipDatasourceUpdate` | bool | |
+| `title` | string | Chart title (supports `{{ }}`) |
+| `xAxis` | expr | X-axis data source |
+| `xAxisDropdown` | string | X-axis field name |
+
+**Dataseries structure:** Each series is an ordered array of config entries:
+```jsx
+dataseries={{
+  ordered: [{
+    0: { ordered: [
+      { label: "fieldName" },
+      { datasource: "{{formatDataAsObject(query.data)['field']}}" },
+      { chartType: "line" },
+      { aggregationType: "sum" },
+      { color: "#033663" },
+      { colors: { ordered: [] } },
+      { visible: true },
+      { hovertemplate: "<b>%{x}</b><br>%{fullData.name}: %{y}<extra></extra>" }
+    ]}
+  }]
+}}
+```
+
+**Data/Layout via external files:** PlotlyChart data and layout are typically stored in `lib/` as JSON files. Data files can contain `{{ }}` expressions for dynamic binding (Plotly transforms: `groupby`, `sort`, `aggregate`). Layout files control axes, margins, fonts, hover behavior.
+
+**Apps (templates):** Charts, Interactive Deal Report
+
+### `<Map>`
+Interactive map component (Mapbox-based).
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | `"map"`, `"mapboxMap1"` |
+| `latitude` | expr | `"{{ table.selectedSourceRow.latitude }}"` |
+| `longitude` | expr | `"-95"` |
+| `zoom` | string | `"3"`, `"12"` |
+| `points` | expr | `"{{ [{ latitude: row.lat, longitude: row.lng }] }}"` |
+| `pointValue` | string | Emoji or text for map markers |
+| `geoJson` | expr | `"{{ geoJsonQuery.data }}"` — GeoJSON for polygons/shapes |
+| `latitudeColumnName` | string | `"lat"` — column name in points data |
+| `longitudeColumnName` | string | `"long"` — column name in points data |
+| `showCurrentLngLat` | bool | |
+| `visiblePoints` | array | |
+
+**Apps (templates):** Firebase Admin Panel, Interactive Map of USA
+
+### `<BoundingBox>`
+Image annotation component for ML labeling workflows.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | `"tagger"` |
+| `boundingBoxes` | expr | `"{{ table.selectedSourceRow.labels }}"` |
+| `imageUrl` | expr | `"{{ table.selectedRow.image_url }}"` |
+
+**Apps (templates):** ML Image Labeller
+
+### `<Alert>`
+Notification banner with configurable type and message.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | `"emailAlert"` |
+| `title` | string | `"Heads Up"` |
+| `description` | expr | Dynamic alert message |
+| `type` | string | `"warning"`, `"info"`, `"success"`, `"error"` |
+| `typeInputMethod` | string | `"dropdown"` |
+| `hidden` | expr | Conditional visibility |
+| `showInEditor` | bool | |
+
+**Apps (templates):** Sendgrid Email Sender
+
+### `<HTML>`
+Raw HTML rendering component.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `html` | expr | HTML content (supports `{{ }}` expressions) |
+| `tooltipText` | string | |
+| `hidden` | expr | |
+
+**Apps (templates):** QR Code Generator
+
+### `<IFrame>`
+Embedded external content via iframe.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `src` | expr | URL (supports `{{ }}` expressions) |
+| `title` | expr | `"{{ self.src }}"` |
+| `margin` | string | `"0"` |
+| `style` | object | |
+
+**Apps (templates):** S3 File Explorer
+
+### `<EditableText>`
+Inline text editing component — displays as text, click to edit.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `value` | expr | `"{{table.selectedRow.email}}"` |
+| `label` | string | |
+| `labelPosition` | string | `"top"` |
+| `editIcon` | string | `"bold/interface-edit-write-1"`, `"edit"` |
+| `inputTooltip` | string | `` "`Enter` to save, `Esc` to cancel" `` |
+| `placeholder` | string | |
+| `textSize` | string | `"default"` |
+
+**Children:** `<Event>` (on `"change"`)
+
+**Apps (templates):** Customer Support Tool, Sendgrid Email Sender
+
+### `<S3Uploader>`
+File upload button that uploads directly to S3.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | `"s3UploadButton"` |
+| `events` | array | Inline event array (same syntax as `JSONEditor` events) |
+
+**Events:** Typically triggers a refresh query on `"upload"` event.
+
+**Apps (templates):** S3 File Explorer
+
+### `<CustomComponent>`
+Embedded React/HTML component via iframe sandbox.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `iframeCode` | string | Full HTML/CSS/JS for the component |
+| `model` | string | JSON string with component configuration |
+| `allowPopups` | bool | |
+| `allowPopupsToEscapeSandbox` | bool | |
+
+**Apps (templates):** Firebase Admin Panel
+
+---
+
+## 9b. Visualization Components
+
+> For full Plotly.js documentation, see [plotly.com/javascript](https://plotly.com/javascript/). This section documents only the ToolScript wrapper.
+
+See `<PlotlyChart>`, `<Map>`, `<BoundingBox>` in Section 9 above.
 
 ---
 
@@ -1268,6 +1490,8 @@ AWS S3 operations.
 | actionType | Description |
 |------------|-------------|
 | *(omitted)* | List objects |
+| `"read"` | Read file content |
+| `"download"` | Download file |
 | `"getSignedUrl"` | Get signed URL |
 | `"upload"` | Upload file |
 | `"copy"` | Copy object |
@@ -1275,12 +1499,13 @@ AWS S3 operations.
 | Attribute | Type |
 |-----------|------|
 | `bucketName` | string (supports `{{ }}`) |
-| `prefix` | string |
+| `prefix` | string (filter listed objects by prefix) |
+| `fileKey` | string (target file path for read/download operations) |
 | `signedOperationName` | string |
 | `signedOperationOptions` | string |
 | `uploadData`/`uploadFileName`/`uploadFileType` | string |
 | `useRawUploadFileType` | bool |
-| `copySource`/`fileKey` | string |
+| `copySource` | string |
 | `queryDisabled` | expr |
 | `queryFailureConditions` | string |
 
@@ -1330,6 +1555,98 @@ Embedded reusable module (shared across apps).
 ```jsx
 <Module id="onsenNavBar1" name="Onsen :: NavBar" pageUuid="uuid" margin="0" />
 ```
+
+### `<FirebaseQuery>`
+Firebase/Firestore operations.
+
+| actionType | Description |
+|------------|-------------|
+| `"queryFirestore"` | Read documents from a collection |
+| `"setFirestore"` | Create/overwrite a document |
+| `"updateFirestore"` | Update fields in a document |
+| `"deleteFirestore"` | Delete a document |
+| `"getCollectionsFirestore"` | List all collections |
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `firebaseService` | string | `"firestore"` |
+| `firestoreCollection` | expr | `"my-collection"` or `"{{ select.value }}"` |
+| `firestoreWhere` | string | `'[{"key":"field","value":"val"}]'` — query filter |
+| `limit` | string | `"25"` |
+| `docId` | expr | `"{{ table.selectedRow.data._id }}"` — target document |
+| `value` | expr | `"{{ jsonEditor.value }}"` — document data for set/update |
+| `useRawCollectionId` | bool | `true` |
+| `resourceDisplayName` | string | |
+| `resourceName` | string | Firebase resource name/UUID |
+| `runWhenModelUpdates` | bool | `false` for mutations |
+| `requireConfirmation` | bool | For destructive operations |
+| `confirmationMessage` | string | |
+
+**Children:** `<Event>` (typically on `"success"` to refresh data)
+
+**Apps (templates):** Firebase Admin Panel
+
+### `<GraphQLQuery>`
+GraphQL API calls.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `body` | include/string | `{include("./lib/query.gql", "string")}` |
+| `resourceDisplayName` | string | |
+| `resourceName` | string | Resource name/UUID |
+| `runWhenModelUpdates` | bool | |
+| `runWhenPageLoads` | bool | |
+
+**Body format:** GraphQL query string, typically stored in `lib/*.gql` files. Variables are embedded via `{{ }}` expressions in the query string.
+
+**Apps (templates):** GitHub PR Dashboard
+
+### `<RetoolTableQuery>`
+Retool built-in database (RetoolDB) operations. Same GUI modes as `<SqlQueryUnified>` but targets Retool's internal database.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `actionType` | string | `"UPDATE_BY"`, `"INSERT"`, `"DELETE_BY"` — same as SqlQueryUnified |
+| `tableName` | string | RetoolDB table name |
+| `changeset` | string | JSON array: `'[{"key":"field","value":"{{ expr }}"}]'` |
+| `filterBy` | string | JSON array: `'[{"key":"id","value":"{{ expr }}","operation":"="}]'` |
+| `resourceDisplayName` | string | RetoolDB resource name |
+| `resourceName` | string | RetoolDB resource name (often same as displayName) |
+| `runWhenModelUpdates` | bool | `false` for mutations |
+
+**Children:** `<Event>` (on `"success"`)
+
+**Apps (templates):** Customer Support Tool, ML Image Labeller, Promo Code Manager
+
+### `<SlackQuery>`
+Slack webhook integration for sending messages.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `message` | expr | Message text with `{{ }}` expressions |
+| `resourceDisplayName` | string | |
+| `resourceName` | string | Slack resource name |
+
+**Apps (templates):** Slack Notifier
+
+### `<SqlQuery>`
+Legacy SQL query component (older version of `<SqlQueryUnified>`). Same core attributes as `SqlQueryUnified` but uses older attribute names. Prefer `<SqlQueryUnified>` for new apps.
+
+| Attribute | Type | Example |
+|-----------|------|---------|
+| `id` | string | |
+| `query` | include/string | SQL query |
+| `resourceDisplayName` | string | |
+| `resourceName` | string | |
+| `isMultiplayerEdited` | bool | |
+| `playgroundQueryId` | number | |
+| `playgroundQuerySaveId` | number | |
+
+**Apps (templates):** Customer Support Tool, GDPR Data Export, Interactive Deal Report, ML Image Labeller, Promo Code Manager, Slack Notifier
 
 ---
 
@@ -1827,7 +2144,7 @@ Every ID in a Retool app follows one of these patterns. When generating an app, 
 
 | Parent | Valid Direct Children |
 |--------|---------------------|
-| `<App>` | `<Include>`, `<Frame>`, `<SplitPaneFrame>`, `<DrawerFrame>`, `<ModalFrame>`, `<AppStyles>`, `<DocumentTitle>`, `<UrlFragments>` |
+| `<App>` | `<Include>`, `<Frame>`, `<SidebarFrame>`, `<SplitPaneFrame>`, `<DrawerFrame>`, `<ModalFrame>`, `<AppStyles>`, `<DocumentTitle>`, `<UrlFragments>` |
 | `<Frame>` | Any visible component, `<Include>`, `<Modal>` |
 | `<Container>` | `<Header>`, `<View>` |
 | `<View>` | Any visible component |
@@ -1850,13 +2167,14 @@ Every ID in a Retool app follows one of these patterns. When generating an app, 
 | `<ToolbarButton>` | `<Event>` |
 | `<DropdownButton>` | `<Option>` (which can contain `<Event>`) |
 | `<ButtonGroup2>` | `<ButtonGroup2-Button>` (which can contain `<Event>`) |
-| `<GlobalFunctions>` | `<Folder>`, `<SqlQueryUnified>`, `<RESTQuery>`, `<JavascriptQuery>`, `<OpenAPIQuery>`, `<S3Query>`, `<SqlTransformQuery>`, `<WorkflowRun>`, `<Function>`, `<State>` |
+| `<SidebarFrame>` | `<Header>`, `<Body>`, `<Footer>` (**must be child of `<App>`, not `<Frame>`**) |
+| `<GlobalFunctions>` | `<Folder>`, `<SqlQueryUnified>`, `<SqlQuery>`, `<RESTQuery>`, `<JavascriptQuery>`, `<OpenAPIQuery>`, `<S3Query>`, `<GraphQLQuery>`, `<FirebaseQuery>`, `<RetoolTableQuery>`, `<SlackQuery>`, `<SqlTransformQuery>`, `<WorkflowRun>`, `<Function>`, `<State>` |
 | `<Folder>` | Same as `<GlobalFunctions>` children |
 | `<Screen>` | `<Folder>`, `<Frame>`, query/state elements |
 
-**Leaf nodes** (never have children): `<Column>`, `<Option>`, `<Property>`, `<Event>`, `<Include>`, `<Module>`, `<Divider>`, `<Spacer>`, `<Text>`, `<TextInput>`, `<TextArea>`, `<Image>`, `<Avatar>`, `<Date>`, `<Slider>`, `<Switch>`, `<Checkbox>`, `<NumberInput>`, `<Statistic>`, `<ProgressBar>`, `<ProgressCircle>`, `<JSONExplorer>`, `<Video>`, `<State>`, `<Chat>`.
+**Leaf nodes** (never have children): `<Column>`, `<Option>`, `<Property>`, `<Event>`, `<Include>`, `<Module>`, `<Divider>`, `<Spacer>`, `<Text>`, `<TextInput>`, `<TextArea>`, `<Image>`, `<Avatar>`, `<Date>`, `<Slider>`, `<Switch>`, `<Checkbox>`, `<NumberInput>`, `<Statistic>`, `<ProgressBar>`, `<ProgressCircle>`, `<JSONExplorer>`, `<Video>`, `<State>`, `<Chat>`, `<Alert>`, `<HTML>`, `<IFrame>`, `<Map>`, `<BoundingBox>`, `<PlotlyChart>`, `<S3Uploader>`, `<CustomComponent>`.
 
-**Note:** `<Button>`, `<Select>`, `<Multiselect>`, `<DateRange>`, `<FileButton>` are leaf-like but can contain `<Event>` children.
+**Note:** `<Button>`, `<Select>`, `<Multiselect>`, `<DateRange>`, `<FileButton>`, `<EditableText>` are leaf-like but can contain `<Event>` children.
 
 **Required structural patterns:**
 1. `<Form>` **must** have `<Header>` + `<Body>` + `<Footer>` (all three, set `showHeader`/`showFooter` to hide visually)
@@ -2422,6 +2740,54 @@ Complete, importable example apps are provided in the `examples/` directory. Eac
 - **Event chains**: update → refresh → re-select row; delete → refresh → clear selection; bulk update → refresh → reset state → hide modal
 - **Safety patterns**: `requireConfirmation` on delete, `disabled` on bulk confirm button with count guard
 
+### 19.7 Chart Dashboard Pattern
+**Pattern:** PlotlyChart-driven dashboard with configurable data source and multiple chart types.
+
+**Key components:**
+- `<PlotlyChart>` with `data` and `layout` stored in `lib/*.data.json` and `lib/*.layout.json`
+- `<Select>` / `<Multiselect>` for data dimension selection
+- `<NumberInput>` for numeric parameter inputs (year ranges, limits)
+- `<Function>` for computing complex chart data (bubble, heatmap, 3D)
+
+**Data flow:** RESTQuery → Function (compute Plotly traces) → PlotlyChart (bind via `datasourceJS`). Data JSON files can use `{{ }}` expressions for dynamic binding. Layout JSON files control Plotly axes, margins, hover, and legend.
+
+**Chart types demonstrated (in official Charts template):** Line (with groupby/sort/aggregate transforms), Bar, Sparkline, Bubble, 2D Heatmap (histogram2dcontour), 3D Ribbon/Surface.
+
+### 19.8 Firebase CRUD Pattern
+**Pattern:** Firebase/Firestore document management with list/detail views and JSON editing.
+
+**Key components:**
+- `<FirebaseQuery>` with `actionType`: `queryFirestore` (read), `setFirestore` (create), `updateFirestore` (update), `deleteFirestore` (delete), `getCollectionsFirestore` (list collections)
+- `<Container>` with programmatic view switching via `container.selectTab(index)` in JavascriptQuery
+- `<JSONEditor>` for document editing
+- `<CustomComponent>` for specialized UI (auto-advance timer)
+
+**Event chain:** Mutation → trigger `goToListView` (JS: `container.selectTab(0)`) → trigger `documents` (refresh list).
+
+### 19.9 File Explorer Pattern (S3)
+**Pattern:** S3 file browser with list, preview, upload, and download.
+
+**Key components:**
+- `<S3Query>` with `actionType`: (omitted=list), `"read"`, `"download"`
+- `<S3Uploader>` with inline events (triggers refresh on upload)
+- `<IFrame>` for file preview
+- `<Container>` with views for different preview types
+
+### 19.10 DrawerFrame Detail Pattern
+**Pattern:** Table row selection opens a slide-out drawer with detail editing. Used when side panel is too small but modal is too disruptive.
+
+**Key wiring:**
+```jsx
+<!-- Table selectRow event → show drawer -->
+<Event id="hex8" event="selectRow" method="show" pluginId="drawerFrame1" type="widget" waitMs="0" waitType="debounce" />
+
+<!-- Drawer close button → hide via setHidden -->
+<Event id="hex8" event="click" method="setHidden" params={{ ordered: [{ hidden: true }] }}
+  pluginId="drawerFrame1" type="widget" waitMs="0" waitType="debounce" />
+```
+
+**DrawerFrame typically contains:** Close button, title bound to selected row, `<EditableText>` for inline editing, `<ButtonGroup2>` for actions, nested `<Table>` for related data.
+
 ---
 
 ## Appendix A: Complete Component Tag Reference
@@ -2429,10 +2795,12 @@ Complete, importable example apps are provided in the `examples/` directory. Eac
 | Tag | Category | Source Apps |
 |-----|----------|------------|
 | `Action` | Table child | All with Table |
+| `Alert` | Presentation | Sendgrid Email Sender (template) |
 | `App` | Root | All |
 | `AppStyles` | Top-level | Image Lab, Iris Atlas v2, Experience Studio |
 | `Avatar` | Presentation | Katalog, Iris Atlas v2 |
 | `Body` | Structural slot | All |
+| `BoundingBox` | Visualization | ML Image Labeller (template) |
 | `Button` | Action | All |
 | `ButtonGroup2` | Action | Prompt Studio, Experience Studio |
 | `ButtonGroup2-Button` | Action | Prompt Studio, Experience Studio |
@@ -2441,23 +2809,29 @@ Complete, importable example apps are provided in the `examples/` directory. Eac
 | `Checkbox` | Input | Prompt Studio, Iris Atlas v2 |
 | `Column` | Table child | All with Table |
 | `Container` | Layout | All |
+| `CustomComponent` | Custom | Firebase Admin Panel (template) |
 | `Date` | Input | iHeadcount |
 | `DateRange` | Input | iHeadcount |
 | `Divider` | Presentation | All |
 | `DocumentTitle` | Top-level | Iris Atlas v2 |
-| `DrawerFrame` | Layout | AI Guide Studio, Prompt Studio, Experience Studio |
+| `DrawerFrame` | Layout | AI Guide Studio, Prompt Studio, Experience Studio, Customer Support Tool (template) |
 | `DropdownButton` | Action | Image Lab, Iris AI Images, Katalog, Experience Studio |
 | `DynamicWidget_*` | Custom | Iris Atlas v2 |
 | `Event` | Event system | All |
+| `EditableText` | Input | Customer Support Tool (template), Sendgrid Email Sender (template) |
 | `ExpandedRow` | Table child | Prompt Catalog, Iris Atlas v2 |
 | `FileButton` | Input | Prompt Studio, Experience Studio |
+| `FirebaseQuery` | Data | Firebase Admin Panel (template) |
 | `Folder` | Organizational | All |
 | `Footer` | Structural slot | All |
 | `Form` | Layout | AI Guide Studio, Katalog, Prompt Studio, Experience Studio, iHeadcount |
 | `Frame` | Top-level | All |
 | `Function` | Data | Image Lab, Chat Insights, Prompt Studio, Iris Atlas v2, Experience Studio, iHeadcount |
 | `GlobalFunctions` | Root | All |
+| `GraphQLQuery` | Data | GitHub PR Dashboard (template) |
+| `HTML` | Presentation | QR Code Generator (template) |
 | `Header` | Structural slot | All |
+| `IFrame` | Presentation | S3 File Explorer (template) |
 | `Image` | Presentation | Image Lab, Prompt Studio, Experience Studio |
 | `Include` | Top-level | All |
 | `JSONEditor` | Input | Prompt Studio, Experience Studio |
@@ -2465,29 +2839,36 @@ Complete, importable example apps are provided in the `examples/` directory. Eac
 | `JavascriptQuery` | Data | All |
 | `KeyValue` | Display | Chat Insights, iHeadcount |
 | `Link` | Action | Prompt Studio, Iris Atlas v2 |
-| `Listbox` | Input | Experience Studio |
+| `Listbox` | Input | Experience Studio, Slack Notifier (template) |
 | `ListView` | Layout | Prompt Studio |
 | `ListViewBeta` | Layout | Image Lab, Chat Insights, Prompt Studio, Iris Atlas v2, Experience Studio, iHeadcount |
 | `Modal` | Layout | AI Guide Studio, Katalog, Prompt Studio |
 | `ModalFrame` | Layout | Iris AI Images, Prompt Studio, Iris Atlas v2, Experience Studio, iHeadcount |
 | `Module` | Module | AI Guide Studio, Chat Insights, Prompt Studio, Iris Atlas v2, Experience Studio |
-| `Multiselect` | Input | AI Guide Studio, Prompt Catalog, Prompt Studio, Iris Atlas v2, Experience Studio |
-| `Navigation` | Presentation | Katalog, Iris Atlas v2 |
+| `Map` | Visualization | Firebase Admin Panel (template), Interactive Map of USA (template) |
+| `Multiselect` | Input | AI Guide Studio, Prompt Catalog, Prompt Studio, Iris Atlas v2, Experience Studio, Charts (template) |
+| `Navigation` | Presentation | Katalog, Iris Atlas v2, Basic Layout (template), Customer Support Tool (template) |
 | `NumberInput` | Input | Prompt Studio, Experience Studio |
 | `OpenAPIQuery` | Data | Prompt Studio, Experience Studio |
 | `Option` | Input child | All |
+| `PlotlyChart` | Visualization | Charts (template), Interactive Deal Report (template) |
 | `ProgressBar` | Display | Katalog |
 | `ProgressCircle` | Display | Iris Atlas v2 |
 | `Property` | Display child | Chat Insights, iHeadcount |
-| `RESTQuery` | Data | Image Lab, Iris AI Images, Prompt Studio, Iris Atlas v2, Experience Studio |
+| `RESTQuery` | Data | Image Lab, Iris AI Images, Prompt Studio, Iris Atlas v2, Experience Studio, Charts (template) |
 | `RadioGroup` | Input | Prompt Studio, Experience Studio |
-| `S3Query` | Data | Experience Studio |
+| `RetoolTableQuery` | Data | Customer Support Tool (template), ML Image Labeller (template), Promo Code Manager (template) |
+| `S3Query` | Data | Experience Studio, S3 File Explorer (template) |
+| `S3Uploader` | Input | S3 File Explorer (template) |
 | `Screen` | Multi-page | Iris Atlas v2 |
 | `SegmentedControl` | Input | Prompt Studio, Experience Studio |
 | `Select` | Input | All |
 | `Slider` | Input | Image Lab, Prompt Studio, Experience Studio |
 | `Spacer` | Presentation | AI Guide Studio, Prompt Studio, Iris Atlas v2, Experience Studio |
+| `SidebarFrame` | Layout | Basic Layout (template), Customer Support Tool (template) |
+| `SlackQuery` | Data | Slack Notifier (template) |
 | `SplitPaneFrame` | Layout | AI Guide Studio, Prompt Studio, Iris Atlas v2, Experience Studio, iHeadcount |
+| `SqlQuery` | Data (legacy) | Customer Support Tool (template), GDPR Data Export (template), Slack Notifier (template) |
 | `SqlQueryUnified` | Data | All |
 | `SqlTransformQuery` | Data | Iris Atlas v2, iHeadcount |
 | `State` | Data | Image Lab, Iris AI Images, Chat Insights, Prompt Studio, Iris Atlas v2, Experience Studio, iHeadcount |

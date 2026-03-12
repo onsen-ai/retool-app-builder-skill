@@ -22,7 +22,7 @@ This skill creates importable Retool apps. Each app is a directory containing RS
 **Reference files** (paths relative to this skill):
 - `references/TOOLSCRIPT-CHEATSHEET.md` — **READ FIRST.** Condensed rules for component nesting, positioning, IDs, queries, events.
 - `references/TOOLSCRIPT-SPEC.md` — Full 2500-line spec. Use for deep lookups when the cheatsheet isn't enough.
-- `assets/examples/` — 6 importable template apps (Minimal, CRUD Table, Master-Detail, Search Filter, AI Chat, Advanced CRUD).
+- `assets/examples/` — 8 importable template apps (Minimal, CRUD Table, Master-Detail, Search Filter, AI Chat, Advanced CRUD, Charts Dashboard, API Dashboard).
 
 **Scripts** in `scripts/` handle validation, scaffolding, and position math — use them instead of manual RSX editing whenever possible.
 
@@ -40,6 +40,8 @@ This skill creates importable Retool apps. Each app is a directory containing RS
 | `extract_component.py <dir> --component ID` | Move subtree to src/ file | When main.rsx gets too large. |
 | `fix_positions.py <dir>` | Recalculate vertical layout | Fix layout after adding/removing components. |
 | `zip_app.sh <dir>` | Zip for Retool import (runs validate) | Final step — produces the importable zip. |
+| `bundle-apps.sh <app-dir> [output]` | Bundle app into single `.toolscript-bundle` file (dev tool) | Skill development: feed full app context to LLM. `--all` for batch. |
+| `compact_bundles.py` | Strip positions/metadata and truncate large inline data from bundles (dev tool) | Skill development: reduce bundle size for bulk analysis. |
 
 **Principle:** Prefer scripts over manual RSX editing. Scripts handle position math, ID generation, and file consistency automatically. Only edit RSX directly for complex customizations scripts can't handle (custom attribute values, conditional logic, complex nesting).
 
@@ -63,7 +65,11 @@ For NEW apps, pick the closest template:
 | Filtered data, search bar | `search-filter` | setFilterStack, DateRange, JavascriptQuery |
 | AI/chat interface | `chat` | Chat component, RESTQuery, JavascriptQuery |
 | Complex: bulk ops, filters, detail pane | `advanced-crud` | Everything above combined |
-| Dashboard with stats | `minimal` | Manually add Statistic, KeyValue components |
+| Dashboard with stats / charts | Charts Dashboard example | Statistic, PlotlyChart with dataseries, lib/ data+layout JSON |
+| REST API table + drawer detail | API Dashboard example | RESTQuery, DrawerFrame, EditableText, setFilterStack |
+| Firebase / Firestore app | `crud` | Replace SqlQueryUnified with FirebaseQuery (queryFirestore/setFirestore/updateFirestore/deleteFirestore) |
+| GraphQL API dashboard | `minimal` | Add GraphQLQuery with .gql files in lib/ |
+| S3 file browser | `minimal` | Add S3Query (list/read/download), S3Uploader, IFrame for preview |
 
 Read the template example files from `assets/examples/<name>/` before customizing — understand what you're starting from.
 
@@ -146,7 +152,9 @@ Read the template example files from `assets/examples/<name>/` before customizin
    - [ ] Could filtering use client-side `setFilterStack()` instead of SQL WHERE?
    - [ ] Are State variables used for UI mode flags (bulk update, editing state)?
    - [ ] Does the app have proper event chains (mutate → refresh → UI update)?
-   - [ ] Are ModalFrame/SplitPaneFrame/DrawerFrame children of App (not Frame)?
+   - [ ] Are ModalFrame/SplitPaneFrame/DrawerFrame/SidebarFrame children of App (not Frame)?
+   - [ ] PlotlyChart data/layout stored in lib/ JSON files (not inline)?
+   - [ ] HTML/IFrame components sanitize user-provided content?
    - [ ] Remove mock data fallbacks if real DB is connected (`Array.isArray(q.data) ? q.data : [...]` in Table/Select data attributes)?
    - [ ] Remove Setup Guide modal if no longer needed?
 4. **Present findings** and proposed changes to user

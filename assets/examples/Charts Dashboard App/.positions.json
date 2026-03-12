@@ -1,0 +1,77 @@
+{
+  "pageTitle": {
+    "row": 0,
+    "height": 0.6,
+    "width": 8
+  },
+  "setupGuideBtn": {
+    "row": 0,
+    "col": 8,
+    "height": 1,
+    "width": 2
+  },
+  "statRevenue": {
+    "row": 0.6,
+    "col": 0,
+    "height": 1,
+    "width": 4
+  },
+  "statOrders": {
+    "row": 0.6,
+    "col": 4,
+    "height": 1,
+    "width": 4
+  },
+  "statConversion": {
+    "row": 0.6,
+    "col": 8,
+    "height": 1,
+    "width": 4
+  },
+  "revenueChartTitle": {
+    "row": 1.6,
+    "height": 0.6,
+    "width": 12
+  },
+  "revenueChart": {
+    "row": 2.2,
+    "height": 8,
+    "width": 12
+  },
+  "categoryChartTitle": {
+    "row": 10.2,
+    "height": 0.6,
+    "width": 12
+  },
+  "categoryChart": {
+    "row": 10.8,
+    "height": 8,
+    "width": 12
+  },
+  "dataTableTitle": {
+    "row": 18.8,
+    "height": 0.6,
+    "width": 12
+  },
+  "salesTable": {
+    "row": 19.4,
+    "height": 13.2,
+    "width": 12
+  },
+  "setupGuideModal": {
+    "row": 0,
+    "height": 1,
+    "width": 12
+  },
+  "setupGuideTitle": {
+    "subcontainer": "setupGuideModal",
+    "rowGroup": "header",
+    "height": 0.6,
+    "width": 12
+  },
+  "setupGuideText": {
+    "subcontainer": "setupGuideModal",
+    "height": 4,
+    "width": 12
+  }
+}

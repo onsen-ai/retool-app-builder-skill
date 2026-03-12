@@ -14,7 +14,7 @@ This skill enables your coding agent to generate complete, importable Retool app
 
 ### Works without a database
 
-Scaffolded apps (crud, master-detail, search-filter, advanced-crud) include **inline mock data** and a **Setup Guide modal**. Tables and forms are fully populated with sample data on import — no database connection required to explore the app. When you're ready to connect your real database, the Setup Guide walks you through the steps, and removing the mock data is a one-line edit per component (`{{ Array.isArray(q.data) ? q.data : [...] }}` → `{{ q.data }}`).
+All 8 example apps include a **Setup Guide modal** with app-specific wiring instructions. Scaffolded apps (crud, master-detail, search-filter, advanced-crud) also include **inline mock data**. Tables and forms are fully populated with sample data on import — no database connection required to explore the app. When you're ready to connect your real database, the Setup Guide walks you through the steps, and removing the mock data is a one-line edit per component (`{{ Array.isArray(q.data) ? q.data : [...] }}` → `{{ q.data }}`).
 
 ## Installation
 
@@ -51,10 +51,10 @@ Most agents discover skills automatically from their skills directory — no ext
 ## What's included
 
 ```
-├── SKILL.md                    # Skill definition (~260 lines)
+├── SKILL.md                    # Skill definition (~290 lines)
 ├── references/
-│   ├── TOOLSCRIPT-CHEATSHEET.md  # Condensed rules (~310 lines)
-│   └── TOOLSCRIPT-SPEC.md        # Full ToolScript spec (2541 lines)
+│   ├── TOOLSCRIPT-CHEATSHEET.md  # Condensed rules (~550 lines)
+│   └── TOOLSCRIPT-SPEC.md        # Full ToolScript spec (~2900 lines)
 ├── scripts/
 │   ├── validate_app.py          # Validate app against all import rules
 │   ├── scaffold_app.py          # Create app from 6 templates
@@ -63,14 +63,18 @@ Most agents discover skills automatically from their skills directory — no ext
 │   ├── add_query.py             # Add query with event chains
 │   ├── extract_component.py     # Move subtree to src/ + add Include
 │   ├── fix_positions.py         # Recalculate vertical layout positions
-│   └── zip_app.sh               # Zip for Retool import (validates first)
-├── assets/examples/             # 6 importable example apps
+│   ├── zip_app.sh               # Zip for Retool import (validates first)
+│   ├── bundle-apps.sh           # Bundle app into single-file LLM context
+│   └── compact_bundles.py       # Strip positions/metadata from bundles for bulk analysis
+├── assets/examples/             # 8 importable example apps
 │   ├── Minimal App/
 │   ├── CRUD Table App/
 │   ├── Master-Detail App/
 │   ├── Search Filter App/
 │   ├── AI Chat App/
-│   └── Advanced CRUD App/
+│   ├── Advanced CRUD App/
+│   ├── Charts Dashboard App/    # PlotlyChart, Statistic, lib/ data+layout JSON
+│   └── API Dashboard App/       # RESTQuery, DrawerFrame, EditableText, setFilterStack
 └── evals/
     └── evals.json               # 3 test cases with assertions
 ```
@@ -89,6 +93,8 @@ All scripts use Python stdlib only. No pip installs required.
 | `extract_component.py <dir> --component ID` | Move subtree to `src/` file |
 | `fix_positions.py <dir>` | Recalculate vertical layout after changes |
 | `zip_app.sh <dir>` | Validate + zip for Retool import |
+| `bundle-apps.sh <dir> [output]` | Bundle app files into single `.toolscript-bundle` for LLM context. `--all` for batch. |
+| `compact_bundles.py` | Strip positions/metadata and truncate large inline data from bundles for bulk analysis. |
 
 ## Eval results
 
@@ -174,7 +180,7 @@ create modal, edit side panel, and approve/reject workflow"
 
 Retool's ToolScript format (RSX) has strict rules for nesting, positioning, ID formats, and query wiring that cause silent import failures when violated. This skill:
 
-1. Bundles a condensed cheatsheet of all rules so the agent doesn't need to memorize the 2541-line spec
+1. Bundles a condensed cheatsheet of all rules so the agent doesn't need to memorize the full spec
 2. Provides automation scripts for the most error-prone operations (position math, ID generation, validation)
 3. Guides the agent through structured workflows (NEW/EDIT/IMPROVE) with explicit steps
 4. Always validates before zipping — catching errors before they reach Retool's importer

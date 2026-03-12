@@ -51,7 +51,7 @@ app-name/
 
 | Parent | Valid Direct Children |
 |--------|---------------------|
-| `<App>` | `Include`, `Frame`, `SplitPaneFrame`, `DrawerFrame`, `ModalFrame`, `AppStyles`, `DocumentTitle`, `UrlFragments` |
+| `<App>` | `Include`, `Frame`, `SidebarFrame`, `SplitPaneFrame`, `DrawerFrame`, `ModalFrame`, `AppStyles`, `DocumentTitle`, `UrlFragments` |
 | `<Frame>` | Any visible component, `Include`, `Modal` |
 | `<Container>` | `Header`, `View` (**must have ≥1 View**) |
 | `<View>` | Any visible component |
@@ -64,11 +64,12 @@ app-name/
 | `<Table>` | `Column` (**must have ≥1**), `Action`, `ToolbarButton`, `Event`, `Include` |
 | `<Select>` / `<Multiselect>` | `Option`, `Event` |
 | `<Button>` / `<Action>` / `<ToolbarButton>` | `Event` |
-| `<GlobalFunctions>` | `Folder`, `SqlQueryUnified`, `RESTQuery`, `JavascriptQuery`, `SqlTransformQuery`, `State`, `Function` |
+| `<SidebarFrame>` | `Header`, `Body`, `Footer` (**must be child of App, NOT Frame**) |
+| `<GlobalFunctions>` | `Folder`, `SqlQueryUnified`, `SqlQuery`, `RESTQuery`, `JavascriptQuery`, `GraphQLQuery`, `FirebaseQuery`, `RetoolTableQuery`, `SlackQuery`, `S3Query`, `OpenAPIQuery`, `SqlTransformQuery`, `State`, `Function` |
 
-**Leaf nodes** (no children): `Column`, `Option`, `Property`, `Event`, `Include`, `Text`, `TextInput`, `TextArea`, `Image`, `Date`, `Slider`, `Switch`, `Checkbox`, `NumberInput`, `Statistic`, `Divider`, `Spacer`, `State`, `Chat`.
+**Leaf nodes** (no children): `Column`, `Option`, `Property`, `Event`, `Include`, `Text`, `TextInput`, `TextArea`, `Image`, `Date`, `Slider`, `Switch`, `Checkbox`, `NumberInput`, `Statistic`, `Divider`, `Spacer`, `State`, `Chat`, `Alert`, `HTML`, `IFrame`, `Map`, `BoundingBox`, `PlotlyChart`, `S3Uploader`, `CustomComponent`.
 
-**Button-like** (leaf except `Event` children): `Button`, `Select`, `Multiselect`, `DateRange`, `FileButton`.
+**Button-like** (leaf except `Event` children): `Button`, `Select`, `Multiselect`, `DateRange`, `FileButton`, `EditableText`.
 
 ---
 
@@ -321,6 +322,105 @@ These 9 rules cause "Failed import" errors if violated:
 <State id="myList" value="{{ [] }}" />
 ```
 
+### FirebaseQuery
+```jsx
+<!-- Read documents -->
+<FirebaseQuery id="documents" actionType="queryFirestore" firebaseService="firestore"
+  firestoreCollection="my-collection" limit="25" useRawCollectionId={true}
+  resourceDisplayName="firebase" resourceName="REPLACE_WITH_RESOURCE" />
+
+<!-- Create/Set document -->
+<FirebaseQuery id="insertDoc" actionType="setFirestore" firebaseService="firestore"
+  firestoreCollection="{{ collection.value }}" value="{{ jsonEditor.value }}"
+  useRawCollectionId={true} runWhenModelUpdates={false}
+  resourceDisplayName="firebase" resourceName="REPLACE_WITH_RESOURCE">
+  <Event id="hex8" event="success" method="trigger" pluginId="documents" type="datasource" waitMs="0" waitType="debounce" />
+</FirebaseQuery>
+
+<!-- Update document -->
+<FirebaseQuery id="updateDoc" actionType="updateFirestore" firebaseService="firestore"
+  firestoreCollection="{{ collection.value }}" docId="{{ table.selectedRow.data._id }}"
+  value="{{ jsonEditor.value }}" useRawCollectionId={true} runWhenModelUpdates={false}
+  resourceDisplayName="firebase" resourceName="REPLACE_WITH_RESOURCE" />
+
+<!-- Delete document (with confirmation) -->
+<FirebaseQuery id="deleteDoc" actionType="deleteFirestore" firebaseService="firestore"
+  firestoreCollection="{{ collection.value }}" docId="{{ table.selectedRow.data._id }}"
+  requireConfirmation={true} confirmationMessage="Delete this document?"
+  useRawCollectionId={true} runWhenModelUpdates={false}
+  resourceDisplayName="firebase" resourceName="REPLACE_WITH_RESOURCE" />
+```
+
+### GraphQLQuery
+```jsx
+<GraphQLQuery id="fetchData" body={include("./lib/query.gql", "string")}
+  resourceDisplayName="github-api" resourceName="REPLACE_WITH_RESOURCE"
+  runWhenPageLoads={true} runWhenModelUpdates={false} />
+```
+
+### RetoolTableQuery
+```jsx
+<RetoolTableQuery id="updateRecord" actionType="UPDATE_BY"
+  changeset={'[{"key":"status","value":"{{ select.value }}"}]'}
+  filterBy={'[{"key":"id","value":"{{ table.selectedRow.id }}","operation":"="}]'}
+  tableName="users" resourceDisplayName="retool_db" resourceName="retool_db"
+  runWhenModelUpdates={false}>
+  <Event id="hex8" event="success" method="trigger" pluginId="selectUsers" type="datasource" waitMs="0" waitType="debounce" />
+</RetoolTableQuery>
+```
+
+### SlackQuery
+```jsx
+<SlackQuery id="sendSlack" message="Alert: {{ table.selectedRow.email }} — {{ message.value }}"
+  resourceDisplayName="slack" resourceName="REPLACE_WITH_RESOURCE" />
+```
+
+### S3Query (read/download)
+```jsx
+<S3Query id="listFiles" prefix="{{ search.value }}"
+  resourceDisplayName="s3" resourceName="REPLACE_WITH_RESOURCE" />
+<S3Query id="readFile" actionType="read" fileKey="{{ table.selectedRow.Key }}"
+  resourceDisplayName="s3" resourceName="REPLACE_WITH_RESOURCE" />
+<S3Query id="downloadFile" actionType="download" fileKey="{{ table.selectedRow.Key }}"
+  resourceDisplayName="s3" resourceName="REPLACE_WITH_RESOURCE" runWhenModelUpdates={false} />
+```
+
+---
+
+## 8b. New Component Quick Reference
+
+### Layout
+```jsx
+<SidebarFrame id="sidebarFrame1" width="240px" padding="8px 12px" isHiddenOnMobile={true} showFooter={true}>
+  <Body><Navigation id="nav" itemMode="static" orientation="vertical"><Option id="hex5" label="Home" /></Navigation></Body>
+  <Footer><Avatar id="av" fallback="{{ current_user.fullName }}" label="{{ current_user.fullName }}" /></Footer>
+</SidebarFrame>
+```
+
+### Visualization
+```jsx
+<PlotlyChart id="chart" chartType="line"
+  data={include("./lib/chart.data.json", "string")} layout={include("./lib/chart.layout.json", "string")}
+  datasourceJS="{{query.data}}" datasourceDataType="array" datasourceInputMode="javascript"
+  isJsonTemplateDirty={true} isLayoutJsonDirty={true} />
+
+<Map id="map" latitude="{{ row.lat }}" longitude="{{ row.lng }}" zoom="12"
+  points="{{ [{ latitude: row.lat, longitude: row.lng }] }}" pointValue="📍" />
+```
+
+### Presentation
+```jsx
+<Alert id="alert1" title="Warning" description="{{ count }} items affected" type="warning" hidden="{{ count <= 0 }}" />
+<HTML id="html1" html={'<img src="{{ url }}" />'} />
+<IFrame id="iframe1" src="{{ fileUrl }}" title="{{ fileName }}" margin="0" />
+<EditableText id="editField" value="{{ row.email }}" label="Email" editIcon="bold/interface-edit-write-1"
+  inputTooltip="`Enter` to save, `Esc` to cancel">
+  <Event id="hex8" event="change" method="trigger" pluginId="updateQuery" type="datasource" waitMs="0" waitType="debounce" />
+</EditableText>
+<BoundingBox id="tagger" boundingBoxes="{{ row.labels }}" imageUrl="{{ row.image_url }}" />
+<S3Uploader id="uploader" events={[{ ordered: [{ event: "upload" }, { type: "datasource" }, { method: "trigger" }, { pluginId: "refreshFiles" }, { params: { ordered: [] } }, { waitType: "debounce" }, { waitMs: "0" }, { id: "hex8" }] }]} />
+```
+
 ---
 
 ## 9. Event Patterns
@@ -352,6 +452,9 @@ These 9 rules cause "Failed import" errors if violated:
 | Button click → run inline JS | `click` | `run` | `script` | `""` | `params={{ map: { src: "code" } }}` |
 | Table action → run inline JS | `clickAction` | `run` | `script` | `""` | `params={{ map: { src: "code" } }}` |
 | Table save → trigger query | `save` | `trigger` | `datasource` | saveQueryId | |
+| Table select → show drawer | `selectRow` | `show` | `widget` | drawerFrameId | |
+| Button click → hide drawer | `click` | `setHidden` | `widget` | drawerFrameId | `params={{ ordered: [{ hidden: true }] }}` |
+| Button click → export data | `click` | `exportData` | `util` | `""` | `params={{ ordered: [{ data, fileName, fileType }] }}` |
 
 ---
 
@@ -415,26 +518,30 @@ When a query has no DB connected, `query.data` returns an error object (not an a
 
 ---
 
-## 11. Spec Section Index
+## 12. Spec Section Index
 
-| Section | Lines | Topic |
-|---------|-------|-------|
-| 1 | 1–28 | Format Overview |
-| 2 | 30–68 | Directory & File Structure |
-| 3 | 70–166 | RSX Syntax |
-| 4 | 168–261 | Top-Level Elements |
-| 5 | 264–452 | Layout & Container Components |
-| 6 | 454–717 | Data Display Components |
-| 7 | 718–985 | Input Components |
-| 8 | 986–1056 | Action Components |
-| 9 | 1057–1137 | Presentation Components |
-| 10 | 1140–1335 | Query & Data System |
-| 11 | 1336–1438 | lib/ File Patterns |
-| 12 | 1441–1542 | Event System |
-| 13 | 1544–1598 | Positioning System |
-| 14 | 1600–1642 | Template Expressions |
-| 17b | 1760–1792 | metadata.json Full Schema |
-| 18 | 1795–2249 | App Generation Guide |
-| 19 | 2250–2426 | App Pattern Recipes |
-| A | 2427–2510 | Component Tag Reference |
-| B | 2513–2541 | Icon Naming Convention |
+| Section | Line | Topic |
+|---------|------|-------|
+| 1 | 9 | Format Overview |
+| 2 | 31 | Directory & File Structure |
+| 3 | 71 | RSX Syntax |
+| 4 | 169 | Top-Level Elements |
+| 5 | 264 | Layout & Container Components (incl. SidebarFrame) |
+| 6 | 487 | Data Display Components |
+| 7 | 757 | Input Components |
+| 8 | 1028 | Action Components |
+| 9 | 1099 | Presentation Components (incl. PlotlyChart, Map, Alert, HTML, IFrame, EditableText, BoundingBox, S3Uploader, CustomComponent) |
+| 9b | 1354 | Visualization Components |
+| 10 | 1362 | Query & Data System (incl. FirebaseQuery, GraphQLQuery, RetoolTableQuery, SlackQuery, SqlQuery) |
+| 11 | 1653 | lib/ File Patterns |
+| 12 | 1758 | Event System |
+| 13 | 1861 | Positioning System |
+| 14 | 1917 | Template Expressions |
+| 15 | 1961 | Module System |
+| 16 | 1999 | Multi-Page Apps |
+| 17 | 2046 | Version Differences |
+| 17b | 2077 | metadata.json Full Schema |
+| 18 | 2112 | App Generation Guide |
+| 19 | 2568 | App Pattern Recipes |
+| A | 2793 | Component Tag Reference |
+| B | 2894 | Icon Naming Convention |
