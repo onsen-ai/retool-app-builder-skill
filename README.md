@@ -86,9 +86,11 @@ All scripts use Python stdlib only. No pip installs required.
 | `fix_positions.py <dir>` | Recalculate vertical layout after changes |
 | `zip_app.sh <dir>` | Validate + zip for Retool import |
 
-## Benchmark
+## Eval results
 
-Tested against 3 eval scenarios (with-skill vs baseline without skill):
+Tested against 3 eval scenarios — each run with the skill vs a baseline without it. All runs used the same model and prompts.
+
+### Summary
 
 | Eval | With Skill | Baseline | Delta |
 |------|-----------|----------|-------|
@@ -98,6 +100,57 @@ Tested against 3 eval scenarios (with-skill vs baseline without skill):
 | **Overall** | **24/24 (100%)** | **19/24 (81%)** | **+19%** |
 
 The skill costs ~39s extra and ~14K more tokens per run but produces structurally correct, importable apps every time.
+
+### Eval 1: Build expense manager from scratch
+
+> Prompt: "Build me a Retool app for managing employee expenses. I need a table showing all expense reports with columns: employee name, amount, category, status, and date. Users should be able to create new expenses via a modal form, edit existing ones in a side panel, and approve/reject by changing status."
+
+| Assertion | With Skill | Baseline |
+|-----------|-----------|----------|
+| Required files (main.rsx, functions.rsx, metadata.json, .positions.json) | PASS | FAIL |
+| Table has 5+ columns (name, amount, category, status, date) | PASS | PASS |
+| Modal with Form for creating new expenses | PASS | PASS |
+| SplitPane/Drawer for editing expenses | PASS | PASS |
+| SELECT, INSERT, UPDATE_BY, DELETE_BY queries | PASS | FAIL |
+| Mutation events trigger SELECT to refresh data | PASS | FAIL |
+| DELETE has requireConfirmation={true} | PASS | FAIL |
+| All mutations have runWhenModelUpdates={false} | PASS | PASS |
+| validate_app.py passes with 0 FAIL | PASS | PASS |
+| Importable .zip created | PASS | PASS |
+
+Baseline missed `.positions.json` (created a `.positions/` directory instead), had no event chains for data refresh, and no delete confirmation.
+
+### Eval 2: Add search + filter to existing app
+
+> Prompt: "I have a CRUD Table App. Add a search bar and a status filter dropdown above the table. Use client-side setFilterStack filtering instead of SQL WHERE clauses."
+
+| Assertion | With Skill | Baseline |
+|-----------|-----------|----------|
+| TextInput with search icon added | PASS | PASS |
+| Select component with status options | PASS | PASS |
+| JavascriptQuery with setFilterStack() | PASS | PASS |
+| lib/applyFilters.js exists | PASS | PASS |
+| Search + filter on same row above table | PASS | PASS |
+| All positions have col + width <= 12 | PASS | PASS |
+| Original CRUD functionality preserved | PASS | PASS |
+| validate_app.py passes with 0 FAIL | PASS | PASS |
+
+Both configurations handled this edit task equally well.
+
+### Eval 3: Improve master-detail app
+
+> Prompt: "Review my Retool app and make it production-ready with best practices."
+
+| Assertion | With Skill | Baseline |
+|-----------|-----------|----------|
+| Audit/checklist presented before making changes | PASS | FAIL |
+| Forms have loading bindings to query.isFetching | PASS | PASS |
+| UPDATE has selectRow event to re-select after update | PASS | PASS |
+| Existing functionality preserved (table, pane, form) | PASS | PASS |
+| validate_app.py passes with 0 FAIL | PASS | PASS |
+| Importable .zip created | PASS | PASS |
+
+The skill's IMPROVE workflow explicitly guides the agent to audit first — the baseline jumped straight to changes.
 
 ## Usage examples
 
